@@ -10,8 +10,15 @@ from setuptools import Distribution
 # To use a consistent encoding
 from codecs import open
 from os import path
+from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
 here = path.abspath(path.dirname(__file__))
+
+class bdist_wheel(_bdist_wheel):
+    def finalize_options(self):
+        _bdist_wheel.finalize_options(self)
+        # Mark us as not a pure python package
+        self.root_is_pure = False
 
 # Get the long description from the README file
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
@@ -150,8 +157,9 @@ setup(
     package_data={  # Optional
         'tfmongodb': ['*.so', '*.dylib'],
     },
-    scripts=['build_wheel.sh'],
-
+    cmdclass={
+        'bdist_wheel': bdist_wheel
+    },
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
     # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files
